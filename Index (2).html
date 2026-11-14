@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- Codificación de caracteres para que se vean bien tildes y ñ -->
+  <meta charset="UTF-8">
+  <!-- Hace que la página se adapte al ancho del celular -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mueblería Escolar</title>
+
+  <!-- Enlace a la hoja de estilos (todavía vacía) -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- PWA: identidad e ícono (Paso 2 y 3 del práctico) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#E75480">
+  <link rel="apple-touch-icon" href="icono-192.png">
+</head>
+<body>
+
+  <!-- ===================== ENCABEZADO Y MENÚ ===================== -->
+  <header id="encabezado">
+    <h1>Mueblería Escolar</h1>
+
+    <nav id="menu-principal" aria-label="Menú principal">
+      <ul>
+        <!-- Cada botón lleva data-seccion: más adelante JS lo usará para saber qué sección mostrar -->
+        <li><button type="button" data-seccion="catalogo">Catálogo</button></li>
+        <li>
+          <button type="button" data-seccion="carrito">
+            Carrito (<span id="contador-carrito">0</span>)
+          </button>
+        </li>
+        <li><button type="button" data-seccion="presupuestos">Presupuestos</button></li>
+        <li><button type="button" data-seccion="administracion">Administración</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ===================== SECCIÓN: CATÁLOGO ===================== -->
+    <section id="catalogo" data-seccion-contenido>
+      <h2>Catálogo</h2>
+
+      <!-- Barra de filtros -->
+      <form id="filtros" aria-label="Filtros del catálogo">
+        <div>
+          <label for="filtro-categoria">Categoría</label>
+          <select id="filtro-categoria">
+            <option value="">Todas</option>
+            <!-- Las categorías reales las va a cargar JavaScript -->
+          </select>
+        </div>
+
+        <div>
+          <label for="filtro-precio-maximo">Precio máximo ($)</label>
+          <input type="number" id="filtro-precio-maximo" min="0" step="1" placeholder="Sin límite">
+        </div>
+
+        <div>
+          <label for="filtro-busqueda">Buscar</label>
+          <input type="search" id="filtro-busqueda" placeholder="Nombre o código">
+        </div>
+      </form>
+
+      <!-- Grilla de productos: está vacía, JavaScript va a dibujar las tarjetas acá -->
+      <div id="grilla-productos"></div>
+    </section>
+
+    <!-- ===================== SECCIÓN: CARRITO ===================== -->
+    <section id="carrito" data-seccion-contenido>
+      <h2>Carrito</h2>
+
+      <!-- Lista de productos agregados (la llena JavaScript) -->
+      <div id="lista-carrito"></div>
+
+      <p>Total: $<span id="total-carrito">0</span></p>
+
+      <button type="button" id="boton-vaciar-carrito">Vaciar carrito</button>
+      <button type="button" id="boton-generar-presupuesto">Generar presupuesto</button>
+    </section>
+
+    <!-- ===================== SECCIÓN: PRESUPUESTOS ===================== -->
+    <section id="presupuestos" data-seccion-contenido>
+      <h2>Presupuesto</h2>
+
+      <!-- Datos del presupuesto -->
+      <form id="formulario-presupuesto">
+        <div>
+          <label for="presupuesto-cliente">Cliente</label>
+          <input type="text" id="presupuesto-cliente" required>
+        </div>
+
+        <div>
+          <label for="presupuesto-descuento">Descuento (%)</label>
+          <input type="number" id="presupuesto-descuento" min="0" max="100" step="1" value="0">
+        </div>
+
+        <div>
+          <label for="presupuesto-validez">Validez (días)</label>
+          <input type="number" id="presupuesto-validez" min="1" step="1" value="15">
+        </div>
+
+        <button type="submit">Calcular presupuesto</button>
+      </form>
+
+      <!-- Área donde se muestra el presupuesto armado -->
+      <div id="area-presupuesto"></div>
+    </section>
+
+    <!-- ===================== SECCIÓN: ADMINISTRACIÓN ===================== -->
+    <section id="administracion" data-seccion-contenido>
+      <h2>Administración</h2>
+
+      <!-- Formulario para cargar o editar un producto.
+           "novalidate" apaga los mensajes automáticos del navegador:
+           los errores los muestra JavaScript debajo de cada campo -->
+      <form id="formulario-producto" novalidate>
+        <div>
+          <label for="producto-codigo">Código</label>
+          <input type="text" id="producto-codigo" maxlength="6" placeholder="Ej.: SIL-01" aria-describedby="error-producto-codigo">
+          <small class="mensaje-error" id="error-producto-codigo"></small>
+        </div>
+
+        <div>
+          <label for="producto-nombre">Nombre</label>
+          <input type="text" id="producto-nombre" aria-describedby="error-producto-nombre">
+          <small class="mensaje-error" id="error-producto-nombre"></small>
+        </div>
+
+        <div>
+          <label for="producto-categoria">Categoría</label>
+          <input type="text" id="producto-categoria" placeholder="Ej.: Sillas" aria-describedby="error-producto-categoria">
+          <small class="mensaje-error" id="error-producto-categoria"></small>
+        </div>
+
+        <div>
+          <label for="producto-material">Material</label>
+          <input type="text" id="producto-material">
+        </div>
+
+        <div>
+          <label for="producto-medidas">Medidas</label>
+          <input type="text" id="producto-medidas" placeholder="Ej.: 120 x 60 x 75 cm" aria-describedby="error-producto-medidas">
+          <small class="mensaje-error" id="error-producto-medidas"></small>
+        </div>
+
+        <div>
+          <label for="producto-precio">Precio ($)</label>
+          <input type="number" id="producto-precio" min="1" step="1" placeholder="Ej.: 48900" aria-describedby="error-producto-precio">
+          <small class="mensaje-error" id="error-producto-precio"></small>
+        </div>
+
+        <div>
+          <label for="producto-imagen">Ruta de la imagen</label>
+          <input type="text" id="producto-imagen" placeholder="Ej.: imagenes/silla_escolar.jpg" aria-describedby="error-producto-imagen">
+          <small class="mensaje-error" id="error-producto-imagen"></small>
+        </div>
+
+        <button type="submit">Guardar producto</button>
+        <button type="reset">Limpiar formulario</button>
+      </form>
+
+      <!-- Respaldo de datos -->
+      <div id="respaldo">
+        <h3>Respaldo de datos</h3>
+        <button type="button" id="boton-exportar">Exportar</button>
+
+        <!-- El input de archivo queda oculto en el futuro; el botón Importar lo va a activar -->
+        <label for="archivo-importar">Importar</label>
+        <input type="file" id="archivo-importar" accept=".json">
+      </div>
+
+      <!-- Tabla de productos cargados, con botones para editar y eliminar (la dibuja JavaScript) -->
+      <div id="lista-administracion"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Mueblería Escolar &mdash; tienda ficticia de artículos escolares para práctica</p>
+  </footer>
+
+  <!-- Enlace al JavaScript (todavía vacío). Va al final para que el HTML ya exista cuando corra -->
+  <script src="app.js"></script>
+</body>
+</html>
